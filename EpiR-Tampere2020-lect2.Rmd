@@ -1,0 +1,388 @@
+---
+title: 
+- Statistical Methods in Cancer Epidemiology using R
+author: 
+- \textbf{Janne Pitkäniemi}  \newline \newline
+- Faculty of Social Sciences, University of Tampere  \newline
+- Finnish Cancer Registry  \newline  \newline
+- Lecture 2
+date: "Feb,10 2010 "
+institute: "janne.pitkaniemi@cancer.fi"
+output:
+  beamer_presentation:
+    includes:  
+         in_header: beamer_header.tex
+---
+
+## Contents
+
+
+- Binary outcomes and proportions 
+\medskip
+- Comparative parameters of risks and their estimation 
+\medskip
+- Binomial regression models and comparative parameters
+\medskip
+- Adjustment for confounding and evaluation of modification by binomial regression 
+
+
+Main R functions covered:
+
+- `twoby2()` (Epi package)
+- `glm()`
+- `ci.lin()` (Epi package)
+
+## Outcomes in epidemiologic research
+
+Epidemiologic studies address the occurrence of diseases and other health related phenomena:
+
+- (a) cross-sectional: **prevalence** of diseases, 
+- (b) longitudinal: disease **incidence**, and mortality
+
+Often we want to compare the prevalence or incidence of disease between two groups defined by a binary *risk factor X*
+
+- *X* = 1: `exposed` *X* = 0: `unexposed`
+
+## Types of outcome variables
+
+- *Binary* (0/1) variables at individual level
+  + disease *status* at a *time point* 
+  +  *change* of status, *event* or *transition* 
+     ({\it e.g.} from healthy to diseased) 
+  
+- *Proportions* at group level
+  + prevalence 
+  + incidence proportion or cumulative incidence,
+- *Rates* of events
+  + incidence or mortality rate (per 1000 y)
+  +  car accidents (per million km)
+
+- *Time* to event
+  + survival time (often censored)
+
+## Incidence and prevalence proportions}
+
+- **Incidence proportion** ($R$) of a binary (0/1) outcome (disease,
+death etc.) over a fixed risk period is defined 
+$$
+ R = {D\over N} 
+  = \frac{ \mbox{number of new cases during period} }
+         { \mbox{size of population-at-risk at start} }  
+$$
+Also called {\bf cumulative incidence} (or even ``risk'').\\
+ \medskip
+**NB**. This formula requires complete follow-up, i.e.
+no {\it censorings}, and absence of {\it competing risks}.
+\bigskip
+-  **Prevalence (proportion)** $P$ of disease
+at time point $t$ 
+$$ P 
+    = {\mbox{no. of existing cases at } t \over 
+   \mbox{total population size at } t } . 
+$$
+
+
+## Two-group comparison
+
+- Binary risk factor $X$: exposed vs. unexposed.
+- Summarizy results from cohort study with fixed risk period and no losses:
+
+\begin{center}
+\begin{tabular}{cccc} \hline
+Exposure         &        Cases        &    Non-cases    &    Group size\\ \hline
+      yes        &            $D_{1}$ &        $C_{1}$  &    $N_{1}$  \\
+      no         &            $D_{0}$  &        $C_{0}$  &    $N_{0}$\\ \hline
+    total        &           $D_{\+}$  &        $C_{\+}$  &   $N_{\+}$\\ \hline
+\end{tabular}
+\end{center}
+
+- Incidence proportions in the two exposure groups
+$$ R_1 = \frac{D_1}{N_1}, \qquad
+   R_0 = \frac{D_0}{N_0} . $$ 
+- These are crude *estimates* of the true *risks* $\pi_{1}$, and $\pi_{0}$ of outcome in the two exposure categories.
+
+
+## Example: Observational clinical study
+
+Treatment failure in two types of operation for renal calculi 
+(Charig \textit{et al.} 1986. \textit{BMJ} 292: 879-882)
+
+- OS = open surgery (invasive)
+- PN = percutaneous nephrolithotomy 
+
+\begin{center}
+\begin{tabular}{ccccc} \hline
+Treatment & Failure  &  Success   &   Patients  & Failure-\% \\
+group ($j$) &  ($D_{j}$) &  ($C_{j}$) &  ($N_{j}$) &  ($R_{j}$)\\ \hline
+   OS ($j=1$)    & 77     & 273   & 350        & {\em 22.0}   \\
+   PN ($j=0$)    & 60     & 290   & 350        & {\em 17.1} \\ \hline
+\end{tabular}
+\end{center}
+
+Crude incidence proportions of treatment failure: $$R_1 = 77/350 = 22.0\%,\qquad R_0 = 60/350 = 17.1\%$$ 
+
+## Risks and their comparative parameters
+
+The **risk** or **probability** of binary outcome (*e.g.* new case of disease) in the `exposed` $\pi_1$ and in the `unexposed` $\pi_0$ as to binary risk factor $X$ (values 1 and 0) are typically compared by
+
+- risk difference $\quad \theta = \pi_1 - \pi_0$
+- risk ratio $\quad	\quad \quad \phi = \pi_1/\pi_0$
+- odds ratio (risk odds ratio)
+$$\psi = \frac{\pi_1/(1 - \pi_1)}{\pi_0/(1 - \pi_0)}$$
+
+The odds ratio is close to the risk ratio when the risks are `small` (less than $0.1$\ -- the `rare-disease assumption`).
+
+## Odds and Odds Ratio (OR)
+
+The **odds ($\Omega$)** is the probability of binary outcome $P(Y=1)=\pi$ divided by the the probability of binary outcome $P(Y=0)=1-\pi$. 
+
+$$\Omega=\frac{\pi}{1-\pi}$$
+
+- Odds of 2.5 means that the probability of Y=1 (success) is two
+and half times higher than the probability of Y=0 (failure)
+- Odds 0.5 means that success probability of success is 50% of
+the probability of failure
+- Odds of 1 implies that probability of both
+outcomes 0.5 (equal)
+
+## Probability and odds
+
+![Caption for the picture.](odds.png)
+
+## Risks and comparative parameters estimated
+
+The risks $\pi_1$ and $\pi_0$ are estimated by empirical incidence proportions $R_1=D_1/N_1$, and $R_0=D_0/N_0$.
+
+\bigskip
+Crude estimates of comparative parameters
+
+- **incidence proportion difference** $\quad \text{RD} = R_1 - R_0$
+- **incidence proportion ratio** $\quad \quad \quad \text{RR} = R_1/R_0$
+- **incidence odds ratio** $$\text{OR} = \frac{R_1/(1 - R_1)}{R_0/(1 - R_0)}$$
+
+**NB**. To remove *confounding*, the estimated must be adjusted for relevant *confounders*.
+
+
+## Example: OS vs. PN (cont'd)
+
+Crude estimates of true risk difference $\theta$, risk ratio $\phi$, and \\ odds ratio $\psi$ between OS and PN:
+
+\begin{eqnarray*}
+\RD & = & \frac{77}{350} - \frac{60}{350} = 0.22 - 0.171 = 
+        + {\bf 0.049} \ (+ 4.9\%)\\
+\RR & = & \frac{77/350}{60/350} = \frac{77/60}{350/350} = \frac{0.22}{0.171} = {\bf 1.283}\\
+\OR & = & \frac{77/273}{60/290} = \frac{0.22/(1 - 0.22)}{0.171/(1 - 0.171)} = {\bf 1.363}
+\end{eqnarray*}
+
+PN appears more successful than OS.
+
+Is this (a) true, (b) due to bias, or (c) due to chance?
+
+## Example: OS vs. PN (cont'd)
+
+Standard error of log(RR), 95\% error factor (EF) of RR, and 95\% CI for true risk ratio $\phi$:
+
+\begin{eqnarray*}
+\SEL & = & \sqrt{ \frac{1}{73} + \frac{1}{60} - \frac{1}{350} - \frac{1}{350}}\\
+     & = & {\bf 0.1547}\\
+     & { } & {  }\\
+\EF & = & \text{exp}\{1.96 \times 0.1547\}\\
+    & = & {\bf 1.3543}\\
+    & { } & {   }\\
+\CI & = & [1.2833/1.3543, 1.2833 \times 1.3543]\\
+    & = & [{\bf 0.9476}, {\bf 1.7380}].
+\end{eqnarray*}
+
+
+## Estimating comparative parameters in R
+
+- A multitude of R functions in several packages are readily available for point estimation and CI calculation using either ``exact'' or/and various approximative methods.
+\medskip
+- We shall here demonstrate the use of function `twoby2()` in the `Epi package`.  It applies the simple Wald approximations as described above, but for 
+  + risk difference: the Newcombe method is used, and 
+  + odds ratio: the `exact` conditional method is also available.
+  
+- Hence, similar results are expected as obtained above.
+
+## Use of function `twoby2()`
+
+- Loading the `Epi package`:
+```{r}
+library(Epi)
+```
+- Reading the counts of the 2 x 2-table into a matrix: 
+
+```{r}
+counts <- c(77, 273, 60, 290)
+tab <- matrix( counts, nrow=2, byrow=T)
+```
+
+- Viewing the contents of the matrix/table: 
+```{r,comment=NA}
+tab
+```
+## Make 2 by 2 table
+- Calling the function with `tab` as its argument: 
+
+\tiny
+
+```{r, comment=NA}
+twoby2(tab)
+```
+
+\normalsize
+
+## Analyses based on binary regression model
+
+Crude estimates and CIs for the comparative parameters can also be obtained by fitting appropriate **binary regression models** for the numbers $D_j$ or proportions $R_j$.
+
+Special cases of **generalized linear models** (GLM) with
+
+- (i) **random part**: $D_j$ is assumed to obey the binomial distribution or {\bf family} with index $N_j$ and probability $\pi_j$,
+- (ii) **systematic part**: **linear predictor** $\eta_j = \alpha + \beta X_j$, in which $X_j = 0$ for unexposed and $X_j = 1$ for exposed, 
+- (iii) **link function**: $g(.)$ that connects the probability $\pi_j$ and the systematic part $\eta_j$ by: $$g(\pi_j) = \eta_j = \alpha + \beta X_j$$
+
+
+## Link functions and comparative parameters
+
+General model: $g(\pi_j) = \alpha + \beta X_j$ for the risks by binary $X$
+
+- **identity** link: $g(\pi_j) = \pi_j = \alpha + \beta X_j$:\\
+      $\Rightarrow \beta=\pi_1-\pi_0=\theta$, \\
+      = \underline{risk difference} btw $X_j=1$ and $X_j=0$
+      \medskip
+- **logarithmic** link: $g(\pi_j) = log(\pi_j)$\\
+$\Leftrightarrow \pi_j=\text{exp}(\alpha + \beta X_j)=e^{\alpha}e^{\beta X_j}$\\
+$\Rightarrow \beta= \text{log}(\pi_1)-\text{log}(\pi_0)= \text{log}(\phi)$, \\
+$\Rightarrow e^{\beta}=\phi$ = \underline{risk ratio} btw exposed and unexposed,
+\medskip
+- **logit** link: $g(\pi_j)=\text{log}[\pi_j/(1-\pi_j)]$
+$$\Leftrightarrow \quad \pi_j=\frac{1}{1+\text{exp}\{-(\alpha + \beta X_j)\}}=\text{expit}(\alpha + \beta X_j)$$
+
+
+## Logit model for odds ratio
+
+Substituting logit function for $g(.)$ and values of $X_j$ we get
+
+\begin{eqnarray*}
+\text{log}\left(\frac{\pi_0}{1-\pi_0}\right) & = & \alpha = \text{baseline logit}\\
+\text{log}\left(\frac{\pi_1}{1-\pi_1}\right) & = & \alpha + \beta.
+\end{eqnarray*}
+This implies
+\begin{eqnarray*}
+\pi_0 & = & \frac{1}{1+\text{exp}(-\alpha)}, \quad \pi_1 = \frac{1}{1+\text{exp}\{-(\alpha+\beta)\}},\\
+\beta & = & \text{log}\left\{\frac{\pi_1/(1-\pi_1)}{\pi_0/(1-\pi_0)}\right\}\\
+e^{\beta} & = & \frac{\pi_1/(1-\pi_1)}{\pi_0/(1-\pi_0)} = \psi = \text{\underline{odds ratio} btw exp'd and unexp'd.}
+\end{eqnarray*}
+
+## Fitting binary regression models in R
+
+Function `glm()`
+
+- estimation method: **maximum likelihood** (ML),computation algorithm: IWLS.
+
+Key arguments of `glm()`:
+
+- model formula: *response* $\sim$ expression of regressors
+
+- `weights` = group sizes $N_j$ when proportions $R_j$ are given as the response (outcome) variable,
+\small
+-  `family = binomial(link = 'log')`, if risk ratio,\newline
+      `family = binomial(link = 'logit')`, if odds ratio, \newline
+      `family = binomial(link = 'identity')`, if risk diff'ce \newline
+      $\qquad$ is the parameter of interest.
+\normalsize      
+
+## Example - Colorectal screenning RHS study
+
+![](CRC_FIN.png)
+
+## Example - data to R
+
+CRC parient mortality between arms
+
+- two observations (one for each treatment group),\medskip
+- three variables: 
+  + `treat` = arm, with values 1 = Screen, 0 = control,
+  + `d` = number of CRC (patient) deaths $D_j$, 
+  + `npat` = number of patients $N_j$,
+  
+- variable vectors defined:
+\small
+```{r,comment=NA}
+treat <- c(0, 1)
+fail <- c(190, 202)
+npat <- c(811, 903)
+prop <- fail/npat
+c(prop*100,prop[2]/prop[1])
+```
+\normalsize
+
+## Estimation of risk ratio
+ 
+- Defining the *model object*: 
+\small
+```{r}
+RRmodel <- glm( prop ~ treat, family=binomial(link='log'), weights=npat)
+```
+\normalsize
+
+- Estimation results extracted by function `ci.lin()` in `Epi`\newline
+(two columns of the whole output omitted for clarity)
+\small
+\normalsize
+```{r,echo=TRUE,comment=NA}
+library(Epi)
+round( ci.lin(RRmodel, Exp=T)[, -(3:4)], 4)
+```
+- The estimate of $\beta$ is $\widehat\beta = -0.0462 = \text{log}(0.9548)$, and that of mortality (ratio) ratio $\phi$ is $\RR = \text{exp}(-0.0462) = 0.9548$.
+- Estimate of $\alpha$ is 
+$\widehat\alpha = -1.4512 = \text{log}(0.2342787) = \text{log}(R_0)$.
+
+## Estimation of odds ratio
+
+\small
+```{r}
+ORmodel <- glm( prop ~ treat, 
+       fam = binomial(link='logit'), weights=npat)
+```
+
+```{r,comment=NA}
+round( ci.lin(ORmodel, Exp=T)[, -(3:4)], 4)
+```
+\normalsize
+
+- The estimate of $\beta$ is $\widehat\beta = -0.0599 = \text{log}(0.9418)$, and the estimated $\psi$ is $\text{OR} = \text{exp}(-0.0599) = 0.9418$.
+- The estimate of $\alpha$ is $\widehat\alpha -1.1843 = \text{log}(0.3060)$, in which\newline
+      $0.3060 = 0.2342787/(1 - 0.2342787)$ is the estimated\newline
+      baseline odds $R_0/(1 - R_0)$.
+      
+## Estimation of risk difference
+
+\small
+```{r}
+ RDmodel <- glm( prop ~ treat, 
+    fam=binomial(link='identity'), w=npat)
+```
+
+```{r,comment=NA}
+round( ci.lin(RDmodel), 3)
+```
+\normalsize
+- Again, same results obtained as with *e.g.*  `twoby2()`,
+  although CIs are here based on Wald statistic.
+- **NB**. Fitting binomial model with this link easily fails with more complicated models, 
+      especially involving continuous variables.
+
+## Same with twoby2
+
+\small
+```{r,comment=NA}
+counts<-c(fail[2],npat[2]-fail[2],fail[1],npat[1]-fail[1])
+counts
+```
+\scriptsize
+```{r, comment=NA}
+twoby2(matrix( counts, nrow=2, byrow=T))
+```
+\normalsize
