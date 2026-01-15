@@ -1,7 +1,17 @@
 ---
 title: "Epidemiological Data Analysis using R"
-author: "Janne PItkäniemi"
-format: beamer
+author: 
+  - Janne Pitkäniemi \newline
+  - Faculty of Social Sciences, Tampere university \newline
+  - Finnish Cancer Registry
+institute: "<janne.pitkaniemi@cancer.fi>"
+format: 
+  beamer:
+    aspectratio: 32
+    navigation: horizontal
+    header-includes:  |
+      \setbeamertemplate{navigation symbols}{}
+      \setbeamertemplate{footline}[page number]{}
 editor: visual
 ---
 
@@ -9,12 +19,24 @@ editor: visual
 
 Basic properties of R
 
-## Bullets
+-   Script files
 
-When you click the **Render** button a document will be generated that includes:
+-   Data structures and objects
 
--   Content authored with markdown
--   Output from executable code
+-   Data input and output
+
+-   Tabulations in R
+
+## What is R
+
+-   Statistical language
+-   Vast community
+-   23 000+ free packages
+-   Cross plattform compatible (Windows, OS,...)
+-   can be connected to other languages
+-   Free & open source
+-   learning is easy
+-   excellent graphics
 
 ## Code
 
